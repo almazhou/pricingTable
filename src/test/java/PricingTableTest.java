@@ -3,6 +3,9 @@ import org.junit.Test;
 
 import java.util.Map;
 
+import static org.hamcrest.core.Is.is;
+import static org.junit.Assert.assertThat;
+
 public class PricingTableTest {
 
     private TestUtils testUtils;
@@ -16,7 +19,24 @@ public class PricingTableTest {
 
     @Test
     public void shouldReturnMoneyOfExactMatch() throws Exception {
-        pricingTable.getPrice("chengdu","engineer");
+        double price = pricingTable.getPrice("xi'an", "finance");
+
+        assertThat(price,is(200.00));
+    }
+
+    @Test
+    public void shouldReturnHighestMoneyWhenFuzzMatch() throws Exception {
+        double price = pricingTable.getPrice("xi'an", "chengdu");
+
+        assertThat(price,is(300.00));
+
+    }
+
+    @Test
+    public void shouldReturnDefaultValueWhenNotMatch() throws Exception {
+        double price = pricingTable.getPrice("zhouxuan", "test");
+
+        assertThat(price,is(100.00));
 
     }
 

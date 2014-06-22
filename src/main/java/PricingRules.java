@@ -13,20 +13,29 @@ public class PricingRules {
 
     public int match(List<String> keywords) {
         List<List<Map<String, Double>>> matchResult = matches(keywords);
-        int sum = 0;
-        for (List<Map<String, Double>> list : matchResult) {
-            sum += list.size();
-            if (list.size() == keywords.size()) return 1;
-        }
-        if (sum != 0) return -1;
+        if (findMatchRow(keywords, matchResult) != null) return 1;
+        if (isFuzzMatch(matchResult)) return -1;
         return 0;
+    }
+
+    private boolean isFuzzMatch(List<List<Map<String, Double>>> matchResult) {
+        return matchResult.size() != 0;
+    }
+
+    public List<Map<String, Double>> findMatchRow(List<String> keywords, List<List<Map<String, Double>>> matchResult) {
+        for (List<Map<String, Double>> list : matchResult) {
+            if (list.size() == keywords.size()) return list;
+        }
+        return null;
     }
 
     public List<List<Map<String, Double>>> matches(List<String> keywords) {
         List<List<Map<String, Double>>> findingResult = new ArrayList<List<Map<String, Double>>>();
         for (PricingRuleRow item : rules) {
             List<Map<String, Double>> resultMap = compareEachRow(item, keywords);
-            findingResult.add(resultMap);
+            if (resultMap.size() != 0) {
+                findingResult.add(resultMap);
+            }
         }
         return findingResult;
     }
