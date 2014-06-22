@@ -7,22 +7,19 @@ import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
 
 public class PricingRulesTest {
-
-    private RuleColumn ruleColumn1;
-    private RuleColumn ruleColumn2;
-    private PricingRuleRow pricingRule1;
     private PricingRules pricingRules;
+    public TestUtils testUtils;
 
     @Before
     public void setUp() throws Exception {
-        createPricingRule("location", "xi'an", "job", "engineer");
-    }
-
-    private void createPricingRule(String columnName1, String keyword1, String columnName2, String keyword2) {
-        ruleColumn1 = createRule(columnName1, keyword1);
-        ruleColumn2 = createRule(columnName2, keyword2);
-        pricingRule1 = createPricingRule(ruleColumn1, ruleColumn2);
-        pricingRules = new PricingRules(Arrays.asList(pricingRule1));
+        testUtils = new TestUtils();
+        RuleColumn ruleColumn1 = testUtils.createRuleColumn("location", "xi'an");
+        RuleColumn ruleColumn2 = testUtils.createRuleColumn("job", "engineer");
+        RuleColumn ruleColumn3 = testUtils.createRuleColumn("location", "chengdu");
+        RuleColumn ruleColumn4 = testUtils.createRuleColumn("job", "finance");
+        PricingRuleRow pricingRule1 = testUtils.createPricingRow(testUtils.createPriceMap("price", 500.00),ruleColumn1,ruleColumn2);
+        PricingRuleRow pricingRule2 = testUtils.createPricingRow(testUtils.createPriceMap("price", 200.00),ruleColumn3,ruleColumn4);
+        pricingRules = testUtils.createPricingRules(pricingRule1,pricingRule2);
     }
 
     @Test
@@ -43,23 +40,10 @@ public class PricingRulesTest {
 
     @Test
     public void shouldReturn0WhenNotMatchAtAll() throws Exception {
-        List<String> keywords = Arrays.asList("chengdu", "finance");
+        List<String> keywords = Arrays.asList("gulin", "teacher");
         int match = pricingRules.match(keywords);
 
         assertThat(match, is(0));
     }
 
-    private PricingRuleRow createPricingRule(RuleColumn rule1, RuleColumn rule2) {
-        List<RuleColumn> ruleColumns = Arrays.asList(rule1, rule2);
-        Map<String, Double> priceMap = new HashMap<String, Double>();
-        priceMap.put("price",500.00);
-        PricingRuleRow pricingRuleRow = new PricingRuleRow(ruleColumns,priceMap);
-        return pricingRuleRow;
-    }
-
-    private RuleColumn createRule(String itemName, String keyword) {
-        Map<String, String> rule = new HashMap<String, String>();
-        rule.put(itemName, keyword);
-        return new RuleColumn(rule);
-    }
 }

@@ -1,5 +1,6 @@
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 public class PricingRules {
 
@@ -11,29 +12,36 @@ public class PricingRules {
     }
 
     public int match(List<String> keywords) {
-        List<Integer> findingResult = new ArrayList<Integer>();
-        for(String keyword:keywords){
-            for (PricingRuleRow item : rules) {
-                compareEachRow(findingResult, keyword, item);
+        List<List<Map<String, Double>>> matchResult = matches(keywords);
+        int sum = 0;
+        for (List<Map<String, Double>> list : matchResult) {
+            sum += list.size();
+            if (list.size() == keywords.size()) return 1;
+        }
+        if (sum != 0) return -1;
+        return 0;
+    }
+
+    public List<List<Map<String, Double>>> matches(List<String> keywords) {
+        List<List<Map<String, Double>>> findingResult = new ArrayList<List<Map<String, Double>>>();
+        for (PricingRuleRow item : rules) {
+            List<Map<String, Double>> resultMap = compareEachRow(item, keywords);
+            findingResult.add(resultMap);
+        }
+        return findingResult;
+    }
+
+    private List<Map<String, Double>> compareEachRow(PricingRuleRow item, List<String> keywords) {
+        List<RuleColumn> ruleColumns = item.getRuleColumns();
+        List<Map<String, Double>> priceMaps = new ArrayList<Map<String, Double>>();
+        for (String keyword : keywords) {
+            for (RuleColumn column : ruleColumns) {
+                if (column.getRule().containsValue(keyword)) {
+                    priceMaps.add(item.getPrice());
+                }
             }
         }
-        if(noMatch(findingResult)) return 0;
-        if(exactMatch(keywords, findingResult)) return 1;
-        return -1;
+        return priceMaps;
     }
 
-    private void compareEachRow(List<Integer> findingResult, String keyword, PricingRuleRow item) {
-        List<RuleColumn> ruleColumns = item.getRuleColumns();
-        for(RuleColumn column: ruleColumns){
-            if(column.getRule().containsValue(keyword)) findingResult.add(1);
-        }
-    }
-
-    private boolean exactMatch(List<String> keywords, List<Integer> findingResult) {
-        return findingResult.size() == keywords.size();
-    }
-
-    private boolean noMatch(List<Integer> findingResult) {
-        return findingResult.size()== 0;
-    }
 }
